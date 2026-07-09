@@ -63,3 +63,13 @@ targets:
         com.apple.security.app-sandbox: true
         com.apple.security.application-groups:
           - group.com.grigory.ntfy-zero-inbox
+
+schemes:
+  NtfyZeroInbox:
+    build:
+      targets:
+        NtfyZeroInbox: all
+    run:
+      config: Debug
+    archive:
+      config: Release

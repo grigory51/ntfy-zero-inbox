@@ -12,6 +12,7 @@
 #   make run TEAM=ABCDE12345
 
 PROJECT   := NtfyZeroInbox.xcodeproj
+SCHEME    := NtfyZeroInbox
 TARGET    := NtfyZeroInbox
 CONFIG    := Debug
 DERIVED   := build
@@ -42,7 +43,7 @@ build: generate
 	@echo "→ Собираю $(TARGET) ($(CONFIG))…"
 	@xcodebuild \
 		-project $(PROJECT) \
-		-target $(TARGET) \
+		-scheme $(SCHEME) \
 		-configuration $(CONFIG) \
 		-derivedDataPath $(DERIVED) \
 		$(TEAM_FLAG) \
