@@ -1,6 +1,6 @@
 name: NtfyZeroInbox
 options:
-  bundleIdPrefix: com.grigory
+  bundleIdPrefix: name.ozhegov
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
@@ -25,7 +25,7 @@ targets:
       - Shared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.grigory.ntfy-zero-inbox
+        PRODUCT_BUNDLE_IDENTIFIER: name.ozhegov.ntfy-zero-inbox
     info:
       path: NtfyZeroInbox/Info.plist
       properties:
@@ -38,7 +38,7 @@ targets:
         com.apple.security.app-sandbox: true
         com.apple.security.network.client: true
         com.apple.security.application-groups:
-          - group.com.grigory.ntfy-zero-inbox
+          - group.name.ozhegov.ntfy-zero-inbox
     dependencies:
       - target: NtfyWidget
 
@@ -50,7 +50,7 @@ targets:
       - Shared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.grigory.ntfy-zero-inbox.widget
+        PRODUCT_BUNDLE_IDENTIFIER: name.ozhegov.ntfy-zero-inbox.widget
     info:
       path: NtfyWidget/Info.plist
       properties:
@@ -62,7 +62,7 @@ targets:
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.application-groups:
-          - group.com.grigory.ntfy-zero-inbox
+          - group.name.ozhegov.ntfy-zero-inbox
 
 schemes:
   NtfyZeroInbox:

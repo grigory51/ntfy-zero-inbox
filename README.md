@@ -41,7 +41,7 @@ Team ID можно и вписать один раз в `project.yml` (`DEVELOPM
 xcodegen generate && open NtfyZeroInbox.xcodeproj   # дальше Cmd+R
 ```
 
-При первом запуске App Group `group.com.grigory.ntfy-zero-inbox` создастся
+При первом запуске App Group `group.name.ozhegov.ntfy-zero-inbox` создастся
 автоматически под твоим Team. Если хочешь другой bundle-id/группу — поменяй в
 `project.yml` (три места: `PRODUCT_BUNDLE_IDENTIFIER`, `application-groups`) и в
 `Shared/AppConfig.swift` (`appGroupID`), они должны совпадать.
