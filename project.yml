@@ -13,7 +13,7 @@ settings:
     CODE_SIGN_STYLE: Automatic
     # Впиши свой Team ID: Xcode → Settings → Accounts → (твой Apple ID) → Team.
     # Без него не соберутся App Group / entitlements.
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: "5KGBYREU52"
     ENABLE_HARDENED_RUNTIME: YES
 
 targets:
