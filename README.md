@@ -26,15 +26,19 @@ inbox с отметкой «обработано» → zero-inbox workflow**. У
 
 ## Сборка
 
+Проще всего через `make` (он сам поставит XcodeGen, сгенерит проект, соберёт и запустит):
+
 ```bash
-# 1. Впиши свой Team ID в project.yml (поле DEVELOPMENT_TEAM).
-#    Xcode → Settings → Accounts → твой Apple ID → Team.
+make run TEAM=ABCDE12345   # свой Team ID: Xcode → Settings → Accounts → Team
+```
 
-# 2. Сгенерируй проект и открой:
-xcodegen generate
-open NtfyZeroInbox.xcodeproj
+Team ID можно и вписать один раз в `project.yml` (`DEVELOPMENT_TEAM`) — тогда просто `make run`.
 
-# 3. Cmd+R. Иконка появится в menu bar.
+Другие цели: `make generate` (только .xcodeproj), `make build`, `make open`
+(открыть в Xcode), `make clean`. Ручной путь без make:
+
+```bash
+xcodegen generate && open NtfyZeroInbox.xcodeproj   # дальше Cmd+R
 ```
 
 При первом запуске App Group `group.com.grigory.ntfy-zero-inbox` создастся
