@@ -1,0 +1,65 @@
+name: NtfyZeroInbox
+options:
+  bundleIdPrefix: com.grigory
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    # Впиши свой Team ID: Xcode → Settings → Accounts → (твой Apple ID) → Team.
+    # Без него не соберутся App Group / entitlements.
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: YES
+
+targets:
+  NtfyZeroInbox:
+    type: application
+    platform: macOS
+    sources:
+      - NtfyZeroInbox
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.grigory.ntfy-zero-inbox
+    info:
+      path: NtfyZeroInbox/Info.plist
+      properties:
+        # Agent-app: без иконки в Dock, живёт только в menu bar.
+        LSUIElement: true
+        CFBundleDisplayName: Ntfy Zero Inbox
+    entitlements:
+      path: NtfyZeroInbox/NtfyZeroInbox.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.application-groups:
+          - group.com.grigory.ntfy-zero-inbox
+    dependencies:
+      - target: NtfyWidget
+
+  NtfyWidget:
+    type: app-extension
+    platform: macOS
+    sources:
+      - NtfyWidget
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.grigory.ntfy-zero-inbox.widget
+    info:
+      path: NtfyWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Ntfy Inbox
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: NtfyWidget/NtfyWidget.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups:
+          - group.com.grigory.ntfy-zero-inbox

@@ -1,0 +1,17 @@
+.DS_Store
+
+# Генерируется XcodeGen из project.yml — не коммитим.
+*.xcodeproj/
+
+# Генерируются XcodeGen'ом из project.yml (info/entitlements).
+NtfyZeroInbox/Info.plist
+NtfyZeroInbox/NtfyZeroInbox.entitlements
+NtfyWidget/Info.plist
+NtfyWidget/NtfyWidget.entitlements
+
+# Сборка Xcode
+DerivedData/
+build/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
