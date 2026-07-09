@@ -6,7 +6,6 @@ struct MenuContentView: View {
     @Bindable var settings: SettingsStore
     let client: NtfyClient
 
-    @Environment(\.openSettings) private var openSettings
     @Query(sort: \InboxItem.time, order: .reverse) private var allItems: [InboxItem]
     @State private var unreadOnly = true
 
@@ -87,8 +86,16 @@ struct MenuContentView: View {
                 .font(.caption).foregroundStyle(.secondary)
             Spacer()
 
-            Button { openSettings() } label: { Image(systemName: "gearshape") }
-                .help("Настройки")
+            // SettingsLink надёжнее openSettings() из MenuBarExtra; активация
+            // выводит окно настроек на передний план у agent-приложения.
+            SettingsLink {
+                Image(systemName: "gearshape")
+            }
+            .simultaneousGesture(TapGesture().onEnded {
+                NSApp.activate(ignoringOtherApps: true)
+            })
+            .help("Настройки")
+
             Button { NSApp.terminate(nil) } label: { Image(systemName: "power") }
                 .help("Выйти")
         }
