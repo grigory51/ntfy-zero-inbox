@@ -32,19 +32,27 @@ struct MenuContentView: View {
     }
 
     private var header: some View {
-        HStack {
-            Circle()
-                .fill(client.isConnected ? Color.green : Color.orange)
-                .frame(width: 8, height: 8)
-            Text(client.isConnected ? "На связи" : "Переподключение…")
-                .font(.caption).foregroundStyle(.secondary)
-            Spacer()
-            Picker("", selection: $unreadOnly) {
-                Text("Непрочит.").tag(true)
-                Text("Все").tag(false)
+        VStack(spacing: 4) {
+            HStack {
+                Circle()
+                    .fill(client.isConnected ? Color.green : Color.orange)
+                    .frame(width: 8, height: 8)
+                Text(client.isConnected ? "На связи" : "Переподключение…")
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Picker("", selection: $unreadOnly) {
+                    Text("Непрочит.").tag(true)
+                    Text("Все").tag(false)
+                }
+                .pickerStyle(.segmented)
+                .fixedSize()
             }
-            .pickerStyle(.segmented)
-            .fixedSize()
+            if let err = client.lastError, !client.isConnected {
+                Text(err)
+                    .font(.caption2).foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(2)
+            }
         }
         .padding(8)
     }
@@ -86,12 +94,14 @@ struct MenuContentView: View {
                 .font(.caption).foregroundStyle(.secondary)
             Spacer()
 
-            // SettingsLink надёжнее openSettings() из MenuBarExtra; активация
-            // выводит окно настроек на передний план у agent-приложения.
+            // SettingsLink надёжнее openSettings() из MenuBarExtra. У agent-app
+            // окно не выходит вперёд, пока политика .accessory — временно делаем
+            // .regular (обратно вернём при закрытии окна, см. SettingsView).
             SettingsLink {
                 Image(systemName: "gearshape")
             }
             .simultaneousGesture(TapGesture().onEnded {
+                NSApp.setActivationPolicy(.regular)
                 NSApp.activate(ignoringOtherApps: true)
             })
             .help("Настройки")

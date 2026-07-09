@@ -1,10 +1,23 @@
 import SwiftUI
+import AppKit
 
 struct SettingsView: View {
     @Bindable var settings: SettingsStore
     let client: NtfyClient
 
     var body: some View {
+        content
+            .onAppear {
+                // Окно уже открыто — убедимся, что оно на переднем плане.
+                NSApp.activate(ignoringOtherApps: true)
+            }
+            .onDisappear {
+                // Возвращаем agent-режим: иконка уходит из Dock.
+                NSApp.setActivationPolicy(.accessory)
+            }
+    }
+
+    private var content: some View {
         Form {
             Section("Сервер") {
                 TextField("URL сервера", text: $settings.serverURL,

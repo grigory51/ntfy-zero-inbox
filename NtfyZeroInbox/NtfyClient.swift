@@ -37,7 +37,14 @@ final class NtfyClient {
     // MARK: - Жизненный цикл подключения
 
     func start() {
-        guard task == nil, let settings, settings.isConfigured else { return }
+        guard task == nil, let settings else { return }
+        guard settings.isConfigured else {
+            lastError = settings.topicList.isEmpty
+                ? "Добавь хотя бы один топик"
+                : "Проверь URL сервера"
+            return
+        }
+        lastError = nil
         task = Task { [weak self] in await self?.runLoop(settings: settings) }
     }
 
@@ -75,21 +82,25 @@ final class NtfyClient {
     }
 
     private func subscribe(settings: SettingsStore) async throws {
-        guard var comps = URLComponents(string: settings.serverURL) else {
+        let base = settings.normalizedServerURL
+        let topics = settings.topicList.joined(separator: ",")
+        let since = settings.sinceToken.isEmpty ? "all" : settings.sinceToken
+        guard let url = URL(string: "\(base)/\(topics)/json?since=\(since)") else {
+            lastError = "Некорректный URL: \(base)"
             throw URLError(.badURL)
         }
-        let topics = settings.topicList.joined(separator: ",")
-        comps.path = "/\(topics)/json"
-        comps.queryItems = [URLQueryItem(name: "since", value: settings.sinceToken)]
-        guard let url = comps.url else { throw URLError(.badURL) }
 
         var request = URLRequest(url: url)
-        if !settings.token.isEmpty {
-            request.setValue("Bearer \(settings.token)", forHTTPHeaderField: "Authorization")
+        if !settings.trimmedToken.isEmpty {
+            request.setValue("Bearer \(settings.trimmedToken)", forHTTPHeaderField: "Authorization")
         }
 
         let (bytes, response) = try await session.bytes(for: request)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+        guard let http = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard http.statusCode == 200 else {
+            lastError = "HTTP \(http.statusCode) от \(base) — проверь адрес/токен"
             throw URLError(.badServerResponse)
         }
         isConnected = true

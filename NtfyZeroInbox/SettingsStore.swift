@@ -33,7 +33,24 @@ final class SettingsStore {
             .filter { !$0.isEmpty }
     }
 
+    /// URL сервера, приведённый к виду: со схемой и без хвостового слэша.
+    /// Спасает от частых опечаток («ntfy.host» без https, «.../» в конце).
+    var normalizedServerURL: String {
+        var s = serverURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !s.lowercased().hasPrefix("http://") && !s.lowercased().hasPrefix("https://") {
+            s = "https://" + s
+        }
+        while s.hasSuffix("/") { s.removeLast() }
+        return s
+    }
+
+    var trimmedToken: String {
+        token.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     var isConfigured: Bool {
-        !serverURL.isEmpty && URL(string: serverURL) != nil && !topicList.isEmpty
+        !normalizedServerURL.isEmpty
+            && URL(string: normalizedServerURL) != nil
+            && !topicList.isEmpty
     }
 }
