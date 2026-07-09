@@ -26,9 +26,15 @@ else
   TEAM_FLAG :=
 endif
 
-.PHONY: all run deps generate build open clean
+.PHONY: all run deps generate build open clean teams
 
 all: run
+
+# Показать доступные Team ID (10 символов в скобках).
+teams:
+	@echo "→ Твои signing identities:"
+	@security find-identity -v -p codesigning | grep -Eo '\([A-Z0-9]{10}\)' | tr -d '()' | sort -u || true
+	@echo "Если пусто — Xcode → Settings → Accounts → твой Apple ID → Team ID."
 
 deps:
 	@command -v xcodegen >/dev/null 2>&1 || { \
@@ -46,6 +52,7 @@ build: generate
 		-scheme $(SCHEME) \
 		-configuration $(CONFIG) \
 		-derivedDataPath $(DERIVED) \
+		-allowProvisioningUpdates \
 		$(TEAM_FLAG) \
 		build
 
