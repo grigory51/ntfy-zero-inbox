@@ -3,6 +3,7 @@
   import { api, onInboxChanged, onStatus } from "./lib/api";
   import type { Channel, Cluster, Message, Status } from "./lib/types";
   import { ago, cap, tier } from "./lib/time";
+  import { iconFor } from "./lib/icons";
   import Settings from "./lib/Settings.svelte";
 
   type View =
@@ -79,7 +80,6 @@
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
     return h % 360;
   }
-  const initial = (s: string) => (s.trim()[0] ?? "#").toUpperCase();
 </script>
 
 <main class="shell">
@@ -128,23 +128,33 @@
         {#if visibleChannels.length === 0}
           <div class="empty">{query ? "Ничего не найдено" : "Пусто. Открой ⚙ и добавь топики."}</div>
         {/if}
-        {#each visibleChannels as ch (ch.topic)}
-          <button class="item" class:unread={ch.unread > 0} onclick={() => (view = { name: "clusters", topic: ch.topic })}>
-            <div class="avatar" style="background: hsl({hue(ch.topic)} 42% 42%)">{initial(ch.topic)}</div>
-            <div class="item-body">
-              <div class="item-title">#{ch.topic}</div>
-              <div class="item-sub">{ch.last_title || ch.last_body || ""}</div>
-            </div>
-            <div class="item-meta">
-              <span class="time">{ago(ch.last_time)}</span>
-              {#if ch.unread > 0}
-                <span class="badge">{cap(ch.unread)}</span>
-              {:else}
-                <span class="soft">{ch.cluster_count} тем</span>
-              {/if}
-            </div>
-          </button>
-        {/each}
+        <div class="grid">
+          {#each visibleChannels as ch (ch.topic)}
+            <button
+              class="tile"
+              class:unread={ch.unread > 0}
+              class:idle={ch.total === 0}
+              title={ch.last_title || ch.last_body || "пока пусто"}
+              onclick={() => (view = { name: "clusters", topic: ch.topic })}
+            >
+              <div
+                class="tile-icon"
+                style="background: linear-gradient(145deg,
+                  hsl({hue(ch.topic)} 45% 50%),
+                  hsl({(hue(ch.topic) + 28) % 360} 50% 34%))"
+              >
+                <span class="tile-emoji">{iconFor(ch.topic)}</span>
+                {#if ch.unread > 0}
+                  <span class="badge tile-badge">{cap(ch.unread)}</span>
+                {/if}
+              </div>
+              <div class="tile-name">#{ch.topic}</div>
+              <div class="tile-sub">
+                {ch.total === 0 ? "пусто" : ago(ch.last_time)}
+              </div>
+            </button>
+          {/each}
+        </div>
       {:else if view.name === "clusters"}
         {#each clusters as cl (cl.id)}
           <button class="item" class:unread={cl.unread > 0} onclick={() => (view = { name: "messages", cluster: cl })}>
@@ -314,6 +324,72 @@
     text-align: center;
     padding: 44px 20px;
     font-size: 13px;
+  }
+
+  /* Плитка каналов */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 6px 4px;
+  }
+  .tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 6px 8px;
+    background: none;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .tile:hover {
+    background: var(--surface);
+  }
+  .tile-icon {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.25),
+      0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+  .tile-emoji {
+    font-size: 28px;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+  }
+  .tile-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+  .tile.idle .tile-icon {
+    filter: saturate(0.35);
+    opacity: 0.65;
+  }
+  .tile-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tile:not(.unread) .tile-name {
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .tile-sub {
+    font-size: 10px;
+    color: var(--muted);
   }
 
   /* JetBrains-Toolbox-подобный ряд */

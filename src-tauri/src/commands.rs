@@ -5,7 +5,23 @@ use tauri::{AppHandle, Emitter, State};
 
 #[tauri::command]
 pub fn get_channels(state: State<AppState>) -> Vec<ChannelDto> {
-    store::channels(&state.db.lock().unwrap())
+    let mut chans = store::channels(&state.db.lock().unwrap());
+    // Подписанные топики показываем всегда, даже пока в них пусто.
+    let topics = state.settings.lock().unwrap().topics.clone();
+    for t in topics {
+        if !chans.iter().any(|c| c.topic == t) {
+            chans.push(ChannelDto {
+                topic: t,
+                total: 0,
+                unread: 0,
+                cluster_count: 0,
+                last_title: None,
+                last_body: None,
+                last_time: None,
+            });
+        }
+    }
+    chans
 }
 
 #[tauri::command]
