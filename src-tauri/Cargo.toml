@@ -1,0 +1,38 @@
+[package]
+name = "ntfy-zero-inbox"
+version = "0.1.0"
+description = "ntfy zero-inbox: channel breakdown + local clustering"
+authors = ["Grigory Ozhegov"]
+edition = "2021"
+
+# Библиотечный крейт нужен для мобильных таргетов Tauri v2.
+[lib]
+name = "ntfy_zero_inbox_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "time", "macros"] }
+reqwest = { version = "0.12", default-features = false, features = ["stream", "rustls-tls"] }
+futures-util = "0.3"
+rusqlite = { version = "0.32", features = ["bundled"] }
+anyhow = "1"
+uuid = { version = "1", features = ["v4"] }
+dirs = "5"
+
+# Локальные эмбеддинги на CPU (ONNX). Тяжёлый крейт — но именно он даёт
+# кластеризацию без Python. На iOS не собирается из коробки: см. README.
+[target.'cfg(not(any(target_os = "ios", target_os = "android")))'.dependencies]
+fastembed = "4"
+
+[profile.dev]
+# fastembed/ort тормозят в debug; оптимизируем зависимости, но не наш код.
+opt-level = 0
+[profile.dev.package."*"]
+opt-level = 2
