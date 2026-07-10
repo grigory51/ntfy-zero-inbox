@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { api, onInboxChanged, onStatus } from "./lib/api";
   import type { Channel, Cluster, Message, Status } from "./lib/types";
-  import { ago } from "./lib/time";
+  import { ago, cap, tier } from "./lib/time";
   import Settings from "./lib/Settings.svelte";
 
   type View =
@@ -63,7 +63,7 @@
       {#if view.name === "channels"}
         <span class="dot" class:on={status.connected}></span>
         <strong>Инбокс</strong>
-        {#if totalUnread > 0}<span class="badge">{totalUnread}</span>{/if}
+        {#if totalUnread > 0}<span class="badge">{cap(totalUnread)}</span>{/if}
         <span class="spacer"></span>
         <button class="ghost" title="Настройки" onclick={() => (view = { name: "settings" })}>⚙</button>
       {:else}
@@ -98,11 +98,11 @@
           <div class="empty">Пусто. Открой ⚙ и добавь топики.</div>
         {/if}
         {#each channels as ch (ch.topic)}
-          <button class="row" onclick={() => (view = { name: "clusters", topic: ch.topic })}>
+          <button class="row" class:unread={ch.unread > 0} onclick={() => (view = { name: "clusters", topic: ch.topic })}>
             <div class="row-main">
               <div class="row-title">
                 <span class="chan">#{ch.topic}</span>
-                {#if ch.unread > 0}<span class="badge sm">{ch.unread}</span>{/if}
+                {#if ch.unread > 0}<span class="badge sm">{cap(ch.unread)}</span>{/if}
               </div>
               <div class="row-sub">{ch.last_title || ch.last_body || ""}</div>
             </div>
@@ -114,11 +114,11 @@
         {/each}
       {:else if view.name === "clusters"}
         {#each clusters as cl (cl.id)}
-          <button class="row" onclick={() => (view = { name: "messages", cluster: cl })}>
+          <button class="row" class:unread={cl.unread > 0} onclick={() => (view = { name: "messages", cluster: cl })}>
             <div class="row-main">
               <div class="row-title">
                 <span class="label">{cl.label || cl.last_body}</span>
-                {#if cl.unread > 0}<span class="badge sm">{cl.unread}</span>{/if}
+                {#if cl.unread > 0}<span class="badge sm">{cap(cl.unread)}</span>{/if}
               </div>
               <div class="row-sub">{cl.last_body}</div>
             </div>
@@ -130,7 +130,7 @@
         {/each}
       {:else if view.name === "messages"}
         {#each messages as m (m.id)}
-          <div class="msg" class:unread={!m.read}>
+          <div class="msg tier-{tier(m.priority)}" class:unread={!m.read}>
             <div class="msg-main">
               {#if m.title}<div class="msg-title">{m.title}</div>{/if}
               <div class="msg-body">{m.body}</div>
@@ -261,14 +261,40 @@
     color: var(--muted);
     white-space: nowrap;
   }
+  /* Непрочитанное — жирным (NN/g: типографика важнее иконок). */
+  .row.unread .chan,
+  .row.unread .label {
+    color: var(--text);
+  }
+  .row:not(.unread) .chan,
+  .row:not(.unread) .label {
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .row.unread .row-sub {
+    color: var(--text);
+  }
+
   .msg {
     display: flex;
     gap: 8px;
     padding: 10px 12px;
     border-bottom: 1px solid var(--border);
+    border-left: 2px solid transparent;
   }
   .msg.unread {
-    background: rgba(99, 102, 241, 0.08);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .msg.unread .msg-title,
+  .msg.unread .msg-body {
+    font-weight: 600;
+  }
+  /* Три уровня важности (ntfy priority). */
+  .msg.tier-high {
+    border-left-color: var(--err);
+  }
+  .msg.tier-low {
+    opacity: 0.72;
   }
   .msg-main {
     flex: 1;
