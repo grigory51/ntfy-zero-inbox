@@ -40,6 +40,19 @@
   });
 
   const totalUnread = $derived(channels.reduce((a, c) => a + c.unread, 0));
+
+  async function delCluster() {
+    if (view.name !== "messages") return;
+    const topic = view.cluster.topic;
+    await api.deleteCluster(view.cluster.id);
+    view = { name: "clusters", topic };
+  }
+
+  async function delChannel() {
+    if (view.name !== "clusters") return;
+    await api.deleteChannel(view.topic);
+    view = { name: "channels" };
+  }
 </script>
 
 <main>
@@ -60,7 +73,11 @@
         </strong>
         <span class="spacer"></span>
         {#if view.name === "clusters"}
-          <button class="ghost" onclick={() => api.markChannelRead(view.topic)}>Прочитать всё</button>
+          <button class="ghost" title="Прочитать всё" onclick={() => api.markChannelRead(view.topic)}>✓</button>
+          <button class="ghost danger" title="Удалить канал" onclick={delChannel}>🗑</button>
+        {:else if view.name === "messages"}
+          <button class="ghost" title="Отметить тему обработанной" onclick={() => api.markClusterRead(view.cluster.id)}>✓</button>
+          <button class="ghost danger" title="Удалить тему" onclick={delCluster}>🗑</button>
         {/if}
       {/if}
     </header>
@@ -69,7 +86,10 @@
       <div class="error">{status.error}</div>
     {/if}
     {#if !status.model_ready}
-      <div class="hint">модель кластеризации ещё грузится — пока резервный режим</div>
+      <div class="loader" title="Скачиваю модель эмбеддингов (один раз, ~23 МБ)">
+        <div class="loader-track"><div class="loader-bar"></div></div>
+        <span>Готовлю умную группировку…</span>
+      </div>
     {/if}
 
     <div class="list">
@@ -109,9 +129,6 @@
           </button>
         {/each}
       {:else if view.name === "messages"}
-        <button class="mark-all ghost" onclick={() => view.name === "messages" && api.markClusterRead(view.cluster.id)}>
-          Отметить тему обработанной
-        </button>
         {#each messages as m (m.id)}
           <div class="msg" class:unread={!m.read}>
             <div class="msg-main">
@@ -122,9 +139,12 @@
                 {#each m.tags as t}<span class="tag">{t}</span>{/each}
               </div>
             </div>
-            {#if !m.read}
-              <button class="check" title="Обработано" onclick={() => api.markRead(m.id)}>✓</button>
-            {/if}
+            <div class="msg-actions">
+              {#if !m.read}
+                <button class="icon-btn" title="Обработано" onclick={() => api.markRead(m.id)}>✓</button>
+              {/if}
+              <button class="icon-btn danger" title="Удалить" onclick={() => api.deleteMessage(m.id)}>🗑</button>
+            </div>
           </div>
         {/each}
       {/if}
@@ -276,8 +296,12 @@
     border-radius: 4px;
     padding: 0 5px;
   }
-  .check {
-    align-self: flex-start;
+  .msg-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .icon-btn {
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -285,11 +309,46 @@
     cursor: pointer;
     width: 24px;
     height: 24px;
-  }
-  .mark-all {
-    width: 100%;
-    padding: 8px;
     font-size: 12px;
-    border-bottom: 1px solid var(--border);
+  }
+  .icon-btn:hover {
+    background: var(--surface);
+  }
+  .icon-btn.danger {
+    color: var(--err);
+  }
+  :global(button.ghost.danger:hover) {
+    color: var(--err);
+  }
+  .loader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .loader-track {
+    flex: 1;
+    height: 3px;
+    background: var(--surface);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .loader-bar {
+    height: 100%;
+    width: 40%;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: slide 1.2s ease-in-out infinite;
+  }
+  @keyframes slide {
+    0% {
+      margin-left: -40%;
+    }
+    100% {
+      margin-left: 100%;
+    }
   }
 </style>

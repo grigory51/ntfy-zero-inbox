@@ -112,6 +112,7 @@ fn handle_message(app: &AppHandle, msg: NtfyMessage) {
     state.settings.lock().unwrap().since = next_since;
 
     let _ = app.emit("inbox-changed", ());
+    crate::refresh_tray(app);
 }
 
 fn set_status(app: &AppHandle, connected: bool, error: Option<String>) {

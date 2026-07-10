@@ -130,6 +130,18 @@ impl Clusterer {
         self.model_ready = true;
     }
 
+    /// Убрать центроид удалённого кластера, чтобы новые сообщения к нему не липли.
+    pub fn remove_cluster(&mut self, id: &str) {
+        for v in self.clusters.values_mut() {
+            v.retain(|c| c.id != id);
+        }
+    }
+
+    /// Убрать все центроиды канала.
+    pub fn remove_topic(&mut self, topic: &str) {
+        self.clusters.remove(topic);
+    }
+
     pub fn assign(&mut self, topic: &str, text: &str) -> Assignment {
         let v = self.embedder.embed(text);
         let entry = self.clusters.entry(topic.to_string()).or_default();

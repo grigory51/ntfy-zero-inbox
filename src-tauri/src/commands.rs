@@ -21,19 +21,45 @@ pub fn get_messages(state: State<AppState>, cluster_id: String) -> Vec<MessageDt
 #[tauri::command]
 pub fn mark_read(app: AppHandle, state: State<AppState>, id: String) {
     store::mark_read(&state.db.lock().unwrap(), &id);
-    let _ = app.emit("inbox-changed", ());
+    changed(&app);
 }
 
 #[tauri::command]
 pub fn mark_cluster_read(app: AppHandle, state: State<AppState>, cluster_id: String) {
     store::mark_cluster_read(&state.db.lock().unwrap(), &cluster_id);
-    let _ = app.emit("inbox-changed", ());
+    changed(&app);
 }
 
 #[tauri::command]
 pub fn mark_channel_read(app: AppHandle, state: State<AppState>, topic: String) {
     store::mark_channel_read(&state.db.lock().unwrap(), &topic);
+    changed(&app);
+}
+
+#[tauri::command]
+pub fn delete_message(app: AppHandle, state: State<AppState>, id: String) {
+    store::delete_message(&state.db.lock().unwrap(), &id);
+    changed(&app);
+}
+
+#[tauri::command]
+pub fn delete_cluster(app: AppHandle, state: State<AppState>, cluster_id: String) {
+    store::delete_cluster(&state.db.lock().unwrap(), &cluster_id);
+    state.clusterer.lock().unwrap().remove_cluster(&cluster_id);
+    changed(&app);
+}
+
+#[tauri::command]
+pub fn delete_channel(app: AppHandle, state: State<AppState>, topic: String) {
+    store::delete_channel(&state.db.lock().unwrap(), &topic);
+    state.clusterer.lock().unwrap().remove_topic(&topic);
+    changed(&app);
+}
+
+/// Уведомить фронт и перерисовать иконку в трее.
+fn changed(app: &AppHandle) {
     let _ = app.emit("inbox-changed", ());
+    crate::refresh_tray(app);
 }
 
 #[tauri::command]

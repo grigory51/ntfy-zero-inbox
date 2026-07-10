@@ -286,6 +286,25 @@ pub fn mark_channel_read(conn: &Connection, topic: &str) {
     let _ = conn.execute("UPDATE messages SET read=1 WHERE topic=?1", [topic]);
 }
 
+pub fn total_unread(conn: &Connection) -> i64 {
+    conn.query_row("SELECT COUNT(*) FROM messages WHERE read=0", [], |r| r.get(0))
+        .unwrap_or(0)
+}
+
+pub fn delete_message(conn: &Connection, id: &str) {
+    let _ = conn.execute("DELETE FROM messages WHERE id=?1", [id]);
+}
+
+pub fn delete_cluster(conn: &Connection, cluster_id: &str) {
+    let _ = conn.execute("DELETE FROM messages WHERE cluster_id=?1", [cluster_id]);
+    let _ = conn.execute("DELETE FROM clusters WHERE id=?1", [cluster_id]);
+}
+
+pub fn delete_channel(conn: &Connection, topic: &str) {
+    let _ = conn.execute("DELETE FROM messages WHERE topic=?1", [topic]);
+    let _ = conn.execute("DELETE FROM clusters WHERE topic=?1", [topic]);
+}
+
 // ---- blob helpers (f32 <-> LE bytes) ----
 
 fn vec_to_blob(v: &[f32]) -> Vec<u8> {
