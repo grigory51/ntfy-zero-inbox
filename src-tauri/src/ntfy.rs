@@ -11,7 +11,9 @@ pub async fn run(app: AppHandle) {
     loop {
         let (cfg, notify) = {
             let state = app.state::<AppState>();
-            (state.settings.lock().unwrap().clone(), state.restart.clone())
+            let cfg = state.settings.lock().unwrap().clone();
+            let notify = state.restart.clone();
+            (cfg, notify)
         };
 
         if !cfg.is_configured() {

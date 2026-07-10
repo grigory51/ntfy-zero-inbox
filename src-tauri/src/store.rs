@@ -60,7 +60,7 @@ pub fn load_settings(conn: &Connection) -> Settings {
 }
 
 pub fn save_settings(conn: &Connection, s: &Settings) -> anyhow::Result<()> {
-    let mut set = |k: &str, v: &str| -> anyhow::Result<()> {
+    let set = |k: &str, v: &str| -> anyhow::Result<()> {
         conn.execute(
             "INSERT INTO settings(key,value) VALUES(?1,?2)
              ON CONFLICT(key) DO UPDATE SET value=?2",
