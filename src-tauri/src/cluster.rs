@@ -88,7 +88,6 @@ struct Centroid {
 
 pub struct Assignment {
     pub cluster_id: String,
-    pub is_new: bool,
     pub centroid: Vec<f32>,
     pub count: u32,
 }
@@ -156,7 +155,6 @@ impl Clusterer {
                 c.count += 1;
                 Assignment {
                     cluster_id: c.id.clone(),
-                    is_new: false,
                     centroid: c.vec.clone(),
                     count: c.count,
                 }
@@ -170,7 +168,6 @@ impl Clusterer {
                 });
                 Assignment {
                     cluster_id: id,
-                    is_new: true,
                     centroid: v,
                     count: 1,
                 }
